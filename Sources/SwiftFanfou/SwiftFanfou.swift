@@ -14,18 +14,30 @@ public final class SwiftFanfou {
         credential = OAuthSwiftCredential(consumerKey: consumerKey, consumerSecret: consumerSecret, oauthToken: oauthToken, oauthTokenSecret: oauthTokenSecret)
     }
 
-    public func xAuth(userName: String, password: String) {
+    public func xAuth(userName: String, password: String, completion: @escaping (Result<(token: String, secret: String), Error>) -> Void) {
         request("https://fanfou.com/oauth/access_token", method: "POST", parameters: ["x_auth_username": userName, "x_auth_password": password, "x_auth_mode": "client_auth"]) { result in
-            guard case let .success(data) = result, let string = String(data: data, encoding: .utf8) else { return }
-            var components = URLComponents()
-            components.query = string
-            var dict: [String: String] = [:]
-            components.queryItems?.forEach { item in
-                dict[item.name] = item.value ?? ""
+            switch result {
+            case .success(let data):
+                guard let string = String(data: data, encoding: .utf8) else {
+                    completion(.failure(NSError(domain: "SwiftFanfou", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
+                    return
+                }
+                var components = URLComponents()
+                components.query = string
+                var dict: [String: String] = [:]
+                components.queryItems?.forEach { item in
+                    dict[item.name] = item.value ?? ""
+                }
+                guard let token = dict["oauth_token"], let tokenSecret = dict["oauth_token_secret"] else {
+                    completion(.failure(NSError(domain: "SwiftFanfou", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing access token"])))
+                    return
+                }
+                self.credential.oauthToken = token
+                self.credential.oauthTokenSecret = tokenSecret
+                completion(.success((token: token, secret: tokenSecret)))
+            case .failure(let error):
+                completion(.failure(error))
             }
-            guard let oauth_token = dict["oauth_token"], let oauth_token_secret = dict["oauth_token_secret"] else { return }
-            self.credential.oauthToken = oauth_token
-            self.credential.oauthTokenSecret = oauth_token_secret
         }
     }
 
@@ -36,7 +48,7 @@ public final class SwiftFanfou {
             switch result {
             case .success(let data):
                 guard let string = String(data: data, encoding: .utf8) else {
-                    completion(.failure(NSError(domain: "OAuth", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
+                    completion(.failure(NSError(domain: "SwiftFanfou", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
                     return
                 }
 
@@ -48,7 +60,7 @@ public final class SwiftFanfou {
                 }
 
                 guard let token = dict["oauth_token"], let tokenSecret = dict["oauth_token_secret"] else {
-                    completion(.failure(NSError(domain: "OAuth", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing request token"])))
+                    completion(.failure(NSError(domain: "SwiftFanfou", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing request token"])))
                     return
                 }
 
@@ -76,7 +88,7 @@ public final class SwiftFanfou {
             switch result {
             case .success(let data):
                 guard let string = String(data: data, encoding: .utf8) else {
-                    completion(.failure(NSError(domain: "OAuth", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
+                    completion(.failure(NSError(domain: "SwiftFanfou", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
                     return
                 }
 
@@ -88,7 +100,7 @@ public final class SwiftFanfou {
                 }
 
                 guard let token = dict["oauth_token"], let tokenSecret = dict["oauth_token_secret"] else {
-                    completion(.failure(NSError(domain: "OAuth", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing access token"])))
+                    completion(.failure(NSError(domain: "SwiftFanfou", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing access token"])))
                     return
                 }
 
