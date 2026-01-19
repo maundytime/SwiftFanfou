@@ -15,7 +15,13 @@ public final class SwiftFanfou {
     }
 
     public func xAuth(userName: String, password: String, completion: @escaping (Result<(token: String, secret: String), Error>) -> Void) {
+        let originalToken = credential.oauthToken
+        let originalSecret = credential.oauthTokenSecret
+        credential.oauthToken = ""
+        credential.oauthTokenSecret = ""
         request("https://fanfou.com/oauth/access_token", method: "POST", parameters: ["x_auth_username": userName, "x_auth_password": password, "x_auth_mode": "client_auth"]) { result in
+            self.credential.oauthToken = originalToken
+            self.credential.oauthTokenSecret = originalSecret
             switch result {
             case .success(let data):
                 guard let string = String(data: data, encoding: .utf8) else {
