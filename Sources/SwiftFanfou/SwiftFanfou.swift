@@ -171,6 +171,15 @@ public final class OAuthSwiftHTTPRequest {
     public var config: Config
     private var request: URLRequest?
     private var task: URLSessionTask?
+    
+    // 创建一个禁用 cookie 的 URLSession
+    private static let noCookieSession: URLSession = {
+        let configuration = URLSessionConfiguration.default
+        configuration.httpCookieAcceptPolicy = .never
+        configuration.httpShouldSetCookies = false
+        configuration.httpCookieStorage = nil
+        return URLSession(configuration: configuration)
+    }()
 
     public init(url: URL, method: String, parameters: [String: Any] = [:], httpBody: Data? = nil, headers: [String: String] = [:]) {
         self.config = Config(url: url, httpMethod: method, httpBody: httpBody, headers: headers, parameters: parameters)
@@ -187,7 +196,8 @@ public final class OAuthSwiftHTTPRequest {
         }
 
         let usedRequest = self.request!
-        task = URLSession.shared.dataTask(with: usedRequest) { data, resp, error in
+        // 使用禁用 cookie 的 session
+        task = Self.noCookieSession.dataTask(with: usedRequest) { data, resp, error in
             if let error = error {
                 completion?(.failure(error))
                 return
