@@ -43,8 +43,14 @@ public final class SwiftFanfou {
 
     public func requestToken(callbackURL: String, completion: @escaping (Result<URL, Error>) -> Void) {
         let url = "https://fanfou.com/oauth/request_token"
+        let originalToken = credential.oauthToken
+        let originalSecret = credential.oauthTokenSecret
+        credential.oauthToken = ""
+        credential.oauthTokenSecret = ""
 
         request(url, method: "POST") { result in
+            self.credential.oauthToken = originalToken
+            self.credential.oauthTokenSecret = originalSecret
             switch result {
             case .success(let data):
                 guard let string = String(data: data, encoding: .utf8) else {
@@ -482,7 +488,7 @@ public struct OAuthSwiftMultipartData {
     public let data: Data
     public let fileName: String?
     public let mimeType: String?
-    
+
     public init(name: String, data: Data, fileName: String?, mimeType: String?) {
         self.name = name
         self.data = data
@@ -549,7 +555,7 @@ extension URL: URLConvertible {
 
     func urlByAppending(queryString: String) -> URL {
         guard !queryString.isEmpty else { return self }
-        
+
         var urlString = absoluteString
         if urlString.hasSuffix("?") {
             urlString.removeLast()
