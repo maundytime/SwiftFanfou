@@ -172,7 +172,7 @@ public final class OAuthSwiftHTTPRequest {
     private var request: URLRequest?
     private var task: URLSessionTask?
 
-    public init(url: URL, method: String = "GET", parameters: [String: Any] = [:], httpBody: Data? = nil, headers: [String: String] = [:]) {
+    public init(url: URL, method: String, parameters: [String: Any] = [:], httpBody: Data? = nil, headers: [String: String] = [:]) {
         self.config = Config(url: url, httpMethod: method, httpBody: httpBody, headers: headers, parameters: parameters)
     }
 
@@ -245,7 +245,7 @@ extension OAuthSwiftHTTPRequest {
         public var parameters: [String: Any]
         public let dataEncoding: String.Encoding
 
-        public init(url: URL, httpMethod: String = "GET", httpBody: Data? = nil, headers: [String: String] = [:], parameters: [String: Any], dataEncoding: String.Encoding = .utf8) {
+        public init(url: URL, httpMethod: String, httpBody: Data? = nil, headers: [String: String] = [:], parameters: [String: Any], dataEncoding: String.Encoding = .utf8) {
             var urlRequest = URLRequest(url: url)
             urlRequest.httpMethod = httpMethod
             urlRequest.httpBody = httpBody

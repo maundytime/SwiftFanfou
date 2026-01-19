@@ -1,6 +1,6 @@
 # SwiftFanfou
 
-A Swift library for interacting with the Fanfou API using OAuth 1.0 authentication.
+A Swift library for interacting with the [Fanfou API](https://github.com/FanfouAPI/FanFouAPIDoc/wiki/Apicategory) using OAuth 1.0 authentication.
 
 ## Features
 
